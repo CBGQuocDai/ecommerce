@@ -16,27 +16,30 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "tblUser")
+@Inheritance(strategy = InheritanceType.JOINED)
 public class User implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(this::getRole);
+        return List.of(() -> "ROLE_" + getRole().toUpperCase());
     }
+    
     @Override
     public String getUsername() {
         return this.email;
     }
+    
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
-    private String fullName;
-    private String email;
-    private String password;
-    @OneToOne(cascade = CascadeType.ALL)
-    private Address address;
-    private boolean isActive;
-
-    private Date createdAt=new Date();
-    private Date updatedAt=new Date();
+    protected long id;
+    protected String fullName;
+    protected String email;
+    protected String password;
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id")
+    protected List<Address> address;
+    protected boolean isActive;
+    protected Date createdAt=new Date();
+    protected Date updatedAt=new Date();
 
     public String getRole(){
         return "user";

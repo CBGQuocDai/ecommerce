@@ -4,7 +4,12 @@ import com.backend.dto.auth.request.LoginRequest;
 import com.backend.dto.auth.request.RegisterRequest;
 import com.backend.dto.auth.request.VerifyOtpRequest;
 import com.backend.dto.auth.response.TokenResponse;
+import com.backend.entity.Buyer;
+import com.backend.entity.Seller;
 import com.backend.entity.User;
+import com.backend.enums.Role;
+import com.backend.repository.BuyerRepository;
+import com.backend.repository.SellerRepository;
 import com.backend.repository.UserRepository;
 import com.backend.service.UserService;
 import com.backend.utils.JwtUtils;
@@ -28,6 +33,8 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final JwtUtils jwtUtils;
     private final PasswordEncoder passwordEncoder;
+    private final SellerRepository sellerRepository;
+    private final BuyerRepository buyerRepository;
     private final RedisTemplate<String,Object> redisTemplate;
     @Transactional
     @Override
@@ -51,14 +58,23 @@ public class UserServiceImpl implements UserService {
         if(u!=null&& u.isActive()) {
             throw new RuntimeException("email already exists");
         }
-        if(u==null) u=new User();
+        if(u!=null) {
+            buyerRepository.deleteById(u.getId());
+            sellerRepository.deleteById(u.getId());
+            userRepository.deleteById(u.getId());
+        }
+        u = new User();
         u.setFullName(req.fullName());
         u.setEmail(req.email());
         u.setPassword(passwordEncoder.encode(req.password()));
         u.setActive(false);
         u.setCreatedAt(new java.util.Date());
         u.setUpdatedAt(new java.util.Date());
-        userRepository.save(u);
+        if(req.role().equals(Role.BUYER)){
+            userRepository.save(new Buyer(u));
+        } else {
+            userRepository.save(new Seller(u));
+        }
         String otp = OtpUtils.generateOtp();
         log.info("otp: {}", otp);
         redisTemplate.opsForValue().set(u.getEmail(), otp,2,TimeUnit.MINUTES);
