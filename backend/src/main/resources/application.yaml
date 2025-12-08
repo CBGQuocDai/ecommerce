@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: backend
+  datasource:
+    url: "${DB_URL}"
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      database: 0
+  jpa:
+    hibernate:
+      ddl-auto:
+    show-sql: true
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION}
