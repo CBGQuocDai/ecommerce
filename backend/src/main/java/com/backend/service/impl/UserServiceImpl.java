@@ -4,6 +4,7 @@ import com.backend.dto.auth.request.LoginRequest;
 import com.backend.dto.auth.request.RegisterRequest;
 import com.backend.dto.auth.request.VerifyOtpRequest;
 import com.backend.dto.auth.response.TokenResponse;
+import com.backend.dto.user.response.UserResponse;
 import com.backend.entity.Buyer;
 import com.backend.entity.Seller;
 import com.backend.entity.User;
@@ -99,6 +100,12 @@ public class UserServiceImpl implements UserService {
         long ttl = claims.getExpiration().getTime() - System.currentTimeMillis();
         redisTemplate.opsForValue().set("token_"+u.getEmail(), claims.getId(),ttl, TimeUnit.MILLISECONDS);
     }
+
+    @Override
+    public UserResponse getUserInfo() {
+        return null;
+    }
+
     @Transactional
     @Override
     public UserDetails loadUserByUsername(String username) {

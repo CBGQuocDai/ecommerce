@@ -15,7 +15,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "tblUser")
+@Table(name = "tbl_user")
 @Inheritance(strategy = InheritanceType.JOINED)
 public class User implements UserDetails {
     @Override
@@ -27,20 +27,20 @@ public class User implements UserDetails {
     public String getUsername() {
         return this.email;
     }
-    
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     protected long id;
     protected String fullName;
     protected String email;
     protected String password;
+    protected String phoneNumber;
+    protected String avatarPath;
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
     protected List<Address> address;
     protected boolean isActive;
     protected Date createdAt=new Date();
     protected Date updatedAt=new Date();
-
     public String getRole(){
         return "user";
     }

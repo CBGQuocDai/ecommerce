@@ -13,7 +13,7 @@ public class Ward {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
-    String name;
+    private String name;
     @ManyToOne
-    Province province;
+    private Province province;
 }
