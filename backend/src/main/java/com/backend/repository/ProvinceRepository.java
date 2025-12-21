@@ -1,0 +1,8 @@
+package com.backend.repository;
+
+import com.backend.entity.Province;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface ProvinceRepository extends JpaRepository<Province, Long> {
+    Province findByName(String province);
+}

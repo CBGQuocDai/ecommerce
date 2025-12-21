@@ -1,4 +1,5 @@
-package com.backend.dto.user.response;
+package com.backend.dto.response.user;
+
 
 public record UserResponse(long id, String fullName, String email, String phoneNumber, String avatarPath) {
 }

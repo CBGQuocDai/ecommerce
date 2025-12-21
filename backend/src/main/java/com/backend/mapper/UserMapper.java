@@ -1,6 +1,6 @@
 package com.backend.mapper;
 
-import com.backend.dto.user.response.UserResponse;
+import com.backend.dto.response.user.UserResponse;
 import com.backend.entity.User;
 import org.springframework.stereotype.Component;
 

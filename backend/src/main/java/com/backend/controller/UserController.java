@@ -1,6 +1,7 @@
 package com.backend.controller;
 
 import com.backend.dto.Response;
+import com.backend.dto.request.user.AddAddressRequest;
 import com.backend.service.impl.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,8 +17,12 @@ public class UserController {
         return ResponseEntity.ok(new Response<>(1000, "success", userService.getUserInfo()));
     }
     @PostMapping("/addAddress")
-    public ResponseEntity<Response<?>> addAddress(){
-        return ResponseEntity.ok(new Response<>(1000, "success", null));
+    public ResponseEntity<Response<?>> addAddress(@RequestBody AddAddressRequest req){
+        return ResponseEntity.ok(new Response<>(1000, "success", userService.addAddress(req)));
+    }
+    @GetMapping("/address")
+    public ResponseEntity<Response<?>> getAddress(){
+        return ResponseEntity.ok(new Response<>(1000, "success", userService.getAddress()));
     }
     @DeleteMapping("/deleteAddress")
     public ResponseEntity<Response<?>> deleteAddress(){

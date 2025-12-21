@@ -1,17 +1,15 @@
 package com.backend.service.impl;
 
-import com.backend.dto.auth.request.LoginRequest;
-import com.backend.dto.auth.request.RegisterRequest;
-import com.backend.dto.auth.request.VerifyOtpRequest;
-import com.backend.dto.auth.response.TokenResponse;
-import com.backend.dto.user.response.UserResponse;
-import com.backend.entity.Buyer;
-import com.backend.entity.Seller;
-import com.backend.entity.User;
+import com.backend.dto.request.auth.LoginRequest;
+import com.backend.dto.request.auth.RegisterRequest;
+import com.backend.dto.request.auth.VerifyOtpRequest;
+import com.backend.dto.response.auth.TokenResponse;
+import com.backend.dto.request.user.AddAddressRequest;
+import com.backend.dto.response.user.UserResponse;
+import com.backend.entity.*;
 import com.backend.enums.Role;
-import com.backend.repository.BuyerRepository;
-import com.backend.repository.SellerRepository;
-import com.backend.repository.UserRepository;
+import com.backend.mapper.impl.UserMapperImpl;
+import com.backend.repository.*;
 import com.backend.service.UserService;
 import com.backend.utils.JwtUtils;
 import com.backend.utils.OtpUtils;
@@ -20,11 +18,14 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -37,6 +38,10 @@ public class UserServiceImpl implements UserService {
     private final SellerRepository sellerRepository;
     private final BuyerRepository buyerRepository;
     private final RedisTemplate<String,Object> redisTemplate;
+    private final UserMapperImpl userMapper;
+    private final ProvinceRepository provinceRepository;
+    private final WardRepository wardRepository;
+
     @Transactional
     @Override
     public TokenResponse login(LoginRequest req) {
@@ -100,13 +105,40 @@ public class UserServiceImpl implements UserService {
         long ttl = claims.getExpiration().getTime() - System.currentTimeMillis();
         redisTemplate.opsForValue().set("token_"+u.getEmail(), claims.getId(),ttl, TimeUnit.MILLISECONDS);
     }
-
+    @Transactional
     @Override
     public UserResponse getUserInfo() {
-        return null;
+        Authentication auth=  SecurityContextHolder.getContext().getAuthentication();
+        User u = (User) auth.getPrincipal();
+        return userMapper.fromUserToUserResponse(u);
     }
-
     @Transactional
+    @Override
+    public List<Address> getAddress() {
+        SecurityContext context = SecurityContextHolder.getContext();
+        Authentication auth=  context.getAuthentication();
+        String email = ((User) auth.getPrincipal()).getEmail();
+        User u = userRepository.findUserByEmail(email);
+        if(u==null) throw new RuntimeException("user not found");
+        return u.getAddress();
+    }
+    @Transactional
+    @Override
+    public List<Address> addAddress(AddAddressRequest req) {
+        Authentication auth=  SecurityContextHolder.getContext().getAuthentication();
+        String email = ((User) auth.getPrincipal()).getEmail();
+        Address address = new Address();
+        address.setDetail(req.detail());
+        Province p = provinceRepository.findByName(req.province());
+        if(p==null) throw new RuntimeException("province not found");
+        Ward w = wardRepository.findByProvinceAndName(p, req.ward());
+        if(w==null) throw new RuntimeException("ward not found");
+        address.setWard(w);
+        User u = userRepository.findUserByEmail(email);
+        u.getAddress().add(address);
+        u= userRepository.save(u);
+        return u.getAddress();
+    }
     @Override
     public UserDetails loadUserByUsername(String username) {
         User user = userRepository.findUserByEmail(username);

@@ -1,4 +1,4 @@
-package com.backend.dto.auth.request;
+package com.backend.dto.request.auth;
 
 import com.backend.enums.Role;
 import jakarta.validation.constraints.Email;

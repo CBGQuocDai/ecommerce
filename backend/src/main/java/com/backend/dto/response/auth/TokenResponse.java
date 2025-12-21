@@ -1,4 +1,4 @@
-package com.backend.dto.auth.response;
+package com.backend.dto.response.auth;
 
 public record TokenResponse(String accessToken) {
 }
